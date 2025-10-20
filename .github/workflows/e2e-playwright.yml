@@ -1,0 +1,55 @@
+# .github/workflows/e2e-playwright.yml
+name: E2E Playwright Tests (Staging)
+
+on:
+  push:
+    branches: [main, staging]
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+env:
+  # Set environment for ConfigLoader.ts
+  TARGET_ENV: staging
+  BASE_URL: https://request.na.test.1800gotjunk.dev
+  START_PATH: /us_en/onlinebooking
+
+  STAGING_USER_EMAIL: ${{ secrets.STAGING_TEST_EMAIL }}
+  STAGING_USER_PASS: ${{ secrets.STAGING_TEST_PASS }}
+
+jobs:
+  e2e:
+    name: Run Playwright E2E Tests
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        package: ["web", "admin"]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: |
+          cd packages/${{ matrix.package }}
+          npm ci
+          npx playwright install --with-deps
+
+      - name: Run Playwright tests (staging)
+        run: |
+          cd packages/${{ matrix.package }}
+          npx playwright test --reporter=html,line
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-${{ matrix.package }}
+          path: packages/${{ matrix.package }}/playwright-report/
+          retention-days: 7
