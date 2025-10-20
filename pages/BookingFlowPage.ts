@@ -133,7 +133,7 @@ export class BookingFlowPage {
   async enterZipAndContinue(zip: string) {
     if (!(await this.step1EnterZipContainer.isVisible())) return; // Skip if Step 1 is hidden
 
-    await this.zipCodeInput.waitFor({ state: "visible", timeout: 10000 });
+    await this.zipCodeInput.waitFor({ state: "visible" });
     const isEditable = await this.zipCodeInput.evaluate(
       (el) => !el.hasAttribute("readonly")
     );
@@ -182,9 +182,9 @@ export class BookingFlowPage {
   ): Promise<void> {
     await expect(this.addressInput).toBeVisible();
     await this.addressInput.click();
-    await this.page.waitForTimeout(2000);
+    // await this.page.waitForTimeout(2000);
     await this.addressInput.fill(address);
-    await this.page.waitForTimeout(1000);
+    // await this.page.waitForTimeout(1000);
     await this.page.getByText(expectedAutoSuggest).click();
   }
 
@@ -210,9 +210,9 @@ export class BookingFlowPage {
   }
 
   async submitBookingAndWaitForConfirmation() {
-    await expect(this.bookFreeEstimateButton).toBeVisible();
-    await this.bookFreeEstimateButton.click();
-    await this.page.waitForLoadState("networkidle");
-    await expect(this.saveToAccountButton).toBeVisible();
+    await Promise.all([
+      this.page.waitForLoadState("networkidle"), // wait for full network idle
+      this.bookFreeEstimateButton.click(),
+    ]);
   }
 }

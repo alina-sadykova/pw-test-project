@@ -11,7 +11,7 @@ test.describe("Online Booking Flow", () => {
     await expect(bookingFlowPage.step2EnterDateAndTimeContainer).toBeVisible();
   });
 
-  test("AT-002: should have Step 2: Date and time selection works", async ({
+  test("AT-002: Step 2: Date and time selection works", async ({
     bookingFlowPage,
   }) => {
     await bookingFlowPage.selectDate();
@@ -22,7 +22,7 @@ test.describe("Online Booking Flow", () => {
     ).toBeVisible();
   });
 
-  test("AT-003: should have Step 3: Pickup details and contact info submission", async ({
+  test("AT-003: Step 3: Pickup details and contact info submission", async ({
     bookingFlowPage,
     bookingFlowData,
   }) => {
