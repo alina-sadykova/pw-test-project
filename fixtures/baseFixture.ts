@@ -1,29 +1,20 @@
-import { BookingFlowPage } from "../pages/BookingFlowPage";
-import { test as base } from "@playwright/test";
+import { BookingFlowPage, PickupDetails } from "../pages/BookingFlowPage";
 
-type BookingTestData = {
-  zip: string;
-  address: string;
-  expectedAutoSuggest: string;
-  firstName: string;
-  lastName: string;
-  phone: string;
-  email: string;
-};
+import { test as base } from "@playwright/test";
 
 type MyFixtures = {
   bookingFlowPage: BookingFlowPage;
-  bookingFlowData: BookingTestData;
+  bookingFlowData: PickupDetails;
 };
 
-const DEFAULT_BOOKING_DATA: BookingTestData = {
+const DEFAULT_BOOKING_DATA: PickupDetails = {
   zip: "80000",
   address: "2305 Steele Street",
   expectedAutoSuggest: "2305 South Steele StreetDenver, CO",
   firstName: "Test",
   lastName: "Staging",
   phone: "5555555555",
-  email: "test_staging@example.com",
+  email: process.env.STAGING_USER_EMAIL || "test_staging@example.com",
 };
 
 export const test = base.extend<MyFixtures>({

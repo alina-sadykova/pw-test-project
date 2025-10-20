@@ -6,13 +6,23 @@ import { loadConfig } from "../config/ConfigLoader";
 
 export const currentConfig = loadConfig(process.env.TARGET_ENV || "staging");
 
+export type PickupDetails = {
+  zip: string;
+  address: string;
+  expectedAutoSuggest: string;
+  firstName: string;
+  lastName: string;
+  phone: string;
+  email: string;
+};
+
 export class BookingFlowPage {
   readonly page: Page;
 
   // STEP CONTAINERS:
-  readonly step1Container: Locator;
-  readonly step2Container: Locator;
-  readonly step3Container: Locator;
+  readonly step1EnterZipContainer: Locator;
+  readonly step2EnterDateAndTimeContainer: Locator;
+  readonly step3EnterPickupDetailsContainer: Locator;
   readonly closeCookieBannerButton: Locator;
 
   // STEP 1:
@@ -36,6 +46,7 @@ export class BookingFlowPage {
   readonly emailInput: Locator;
   readonly bookFreeEstimateButton: Locator;
   readonly saveToAccountButton: Locator;
+  // readonly saveToAccountButton: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -44,44 +55,65 @@ export class BookingFlowPage {
     this.closeCookieBannerButton = page.locator(
       "#onetrust-close-btn-container > button"
     );
-    this.step1Container = page.locator("#step1").first();
-    this.step2Container = page.locator("#step2").first();
-    this.step3Container = page.locator("#step3").first();
+    this.step1EnterZipContainer = page.locator("#step1").first();
+    this.step2EnterDateAndTimeContainer = page.locator("#step2").first();
+    this.step3EnterPickupDetailsContainer = page.locator("#step3").first();
 
     // STEP 1:
-    this.zipCodeInput = this.step1Container.getByPlaceholder(
+    this.zipCodeInput = this.step1EnterZipContainer.getByPlaceholder(
       "Enter Your Zip Code"
     );
-    this.nextButton = this.step1Container.getByRole("button", { name: "Next" });
+    this.nextButton = this.step1EnterZipContainer.getByRole("button", {
+      name: "Next",
+    });
 
     // STEP 2:
-    this.datePicker = this.step2Container.locator("#datepicker-input");
-    this.availableDate = this.step2Container
+    this.datePicker =
+      this.step2EnterDateAndTimeContainer.locator("#datepicker-input");
+    this.availableDate = this.step2EnterDateAndTimeContainer
       .locator(
         "div.react-datepicker__day:not(.react-datepicker__day--disabled)"
       )
       .first();
-    this.timePicker = this.step2Container.locator("#GJ-OBE-TimePicker");
-    this.availableTime = this.step2Container.locator(".timeList a").first();
-    this.enterPickupDetailsButton = this.step2Container.getByRole("button", {
-      name: "ENTER PICK-UP DETAILS",
-    });
+    this.timePicker =
+      this.step2EnterDateAndTimeContainer.locator("#GJ-OBE-TimePicker");
+    this.availableTime = this.step2EnterDateAndTimeContainer
+      .locator(".timeList a")
+      .first();
+    this.enterPickupDetailsButton =
+      this.step2EnterDateAndTimeContainer.getByRole("button", {
+        name: "ENTER PICK-UP DETAILS",
+      });
 
     // STEP 3:
-    this.homeRadioButton = this.step3Container.getByRole("radio", {
-      name: "Home",
-    });
-    this.addressInput = this.step3Container.locator('input[name="address"]');
-    this.firstNameInput = this.step3Container.locator(
+    this.homeRadioButton = this.step3EnterPickupDetailsContainer.getByRole(
+      "radio",
+      {
+        name: "Home",
+      }
+    );
+    this.addressInput = this.step3EnterPickupDetailsContainer.locator(
+      'input[name="address"]'
+    );
+    this.firstNameInput = this.step3EnterPickupDetailsContainer.locator(
       'input[name="firstName"]'
     );
-    this.lastNameInput = this.step3Container.locator('input[name="lastName"]');
-    this.phoneInput = this.step3Container.locator('input[name="phoneNumber"]');
-    this.emailInput = this.step3Container.locator('input[name="email"]');
-    this.bookFreeEstimateButton = this.step3Container.getByRole("button", {
-      name: "Book Free Onsite Estimate",
+    this.lastNameInput = this.step3EnterPickupDetailsContainer.locator(
+      'input[name="lastName"]'
+    );
+    this.phoneInput = this.step3EnterPickupDetailsContainer.locator(
+      'input[name="phoneNumber"]'
+    );
+    this.emailInput = this.step3EnterPickupDetailsContainer.locator(
+      'input[name="email"]'
+    );
+    this.bookFreeEstimateButton =
+      this.step3EnterPickupDetailsContainer.getByRole("button", {
+        name: "Book Free Onsite Estimate",
+      });
+    this.saveToAccountButton = page.getByRole("link", {
+      name: "SAVE TO ACCOUNT",
     });
-    this.saveToAccountButton = this.page.locator(".account-cta-btn").first();
   }
 
   // METHODS:
@@ -99,7 +131,7 @@ export class BookingFlowPage {
 
   // Step 1: ZIP entry
   async enterZipAndContinue(zip: string) {
-    if (!(await this.step1Container.isVisible())) return; // Skip if Step 1 is hidden
+    if (!(await this.step1EnterZipContainer.isVisible())) return; // Skip if Step 1 is hidden
 
     await this.zipCodeInput.waitFor({ state: "visible", timeout: 10000 });
     const isEditable = await this.zipCodeInput.evaluate(
@@ -113,10 +145,11 @@ export class BookingFlowPage {
 
   // Step 2: Choose date and time
   async selectDate(): Promise<void> {
-    await this.step2Container.waitFor({ state: "visible" });
     await expect(this.datePicker).toBeVisible();
     await this.datePicker.click();
+    await this.availableDate.waitFor({ state: "visible" });
     await this.availableDate.click();
+    await this.page.waitForTimeout(2000);
   }
 
   async selectTimeSlot(): Promise<void> {
@@ -137,6 +170,7 @@ export class BookingFlowPage {
   }
 
   // Step 3: Enter pick-up details
+
   async selectHomeLocation(): Promise<void> {
     await expect(this.homeRadioButton).toBeVisible();
     await this.homeRadioButton.check();
@@ -167,14 +201,9 @@ export class BookingFlowPage {
     await this.emailInput.fill(email);
   }
 
-  async completePickupDetails(
-    address: string,
-    expectedAutoSuggest: string,
-    firstName: string,
-    lastName: string,
-    phone: string,
-    email: string
-  ): Promise<void> {
+  async completePickupDetails(details: PickupDetails): Promise<void> {
+    const { address, expectedAutoSuggest, firstName, lastName, phone, email } =
+      details;
     await this.selectHomeLocation();
     await this.fillPickupAddress(address, expectedAutoSuggest);
     await this.fillContactDetails(firstName, lastName, phone, email);
@@ -183,9 +212,7 @@ export class BookingFlowPage {
   async submitBookingAndWaitForConfirmation() {
     await expect(this.bookFreeEstimateButton).toBeVisible();
     await this.bookFreeEstimateButton.click();
-
     await this.page.waitForLoadState("networkidle");
-
     await expect(this.saveToAccountButton).toBeVisible();
   }
 }
