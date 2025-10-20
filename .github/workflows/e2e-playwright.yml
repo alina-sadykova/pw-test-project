@@ -7,41 +7,42 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
 
-env:
-  # Environment for your ConfigLoader.ts
-  TARGET_ENV: staging
-
-  # Base URL and start path stored as secrets to avoid pushing to repo
-  BASE_URL: ${{ secrets.BASE_URL }}
-  START_PATH: ${{ secrets.START_PATH }}
-
-  # Staging credentials
-  STAGING_USER_EMAIL: ${{ secrets.STAGING_TEST_EMAIL }}
-  STAGING_USER_PASS: ${{ secrets.STAGING_TEST_PASS }}
-
 jobs:
   e2e:
-    name: Run Playwright E2E Tests
+    name: Run Playwright E2E Tests (Chromium)
     runs-on: ubuntu-latest
 
+    env:
+      TARGET_ENV: staging
+      BASE_URL: https://request.na.test.1800gotjunk.dev
+      START_PATH: /us_en/onlinebooking
+      STAGING_USER_EMAIL: ${{ secrets.STAGING_TEST_EMAIL }}
+      STAGING_USER_PASS: ${{ secrets.STAGING_TEST_PASS }}
+
     steps:
+      # Step 1: Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # Step 2: Setup Node.js
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
+      # Step 3: Install dependencies & Playwright browsers
       - name: Install dependencies
         run: |
           npm ci
           npx playwright install --with-deps
 
-      - name: Run Playwright tests (staging)
-        run: npx playwright test --reporter=html,line
+      # Step 4: Run Playwright tests (Chromium only)
+      - name: Run E2E tests
+        run: |
+          npx playwright test --project=chromium --reporter=html,line
 
-      - name: Upload Playwright report
+      # Step 5: Upload Playwright HTML report
+      - name: Upload Playwright HTML Report
         if: always()
         uses: actions/upload-artifact@v4
         with:
