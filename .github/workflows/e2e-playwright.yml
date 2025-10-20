@@ -14,8 +14,8 @@ jobs:
 
     env:
       TARGET_ENV: staging
-      BASE_URL: https://request.na.test.1800gotjunk.dev
-      START_PATH: /us_en/onlinebooking
+      BASE_URL: ${{ secrets.BASE_URL }}
+      START_PATH: ${{ secrets.START_PATH }}
       STAGING_USER_EMAIL: ${{ secrets.STAGING_TEST_EMAIL }}
       STAGING_USER_PASS: ${{ secrets.STAGING_TEST_PASS }}
 
