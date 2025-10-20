@@ -8,11 +8,14 @@ on:
     types: [opened, synchronize, reopened]
 
 env:
-  # Set environment for ConfigLoader.ts
+  # Environment for your ConfigLoader.ts
   TARGET_ENV: staging
-  BASE_URL: https://request.na.test.1800gotjunk.dev
-  START_PATH: /us_en/onlinebooking
 
+  # Base URL and start path stored as secrets to avoid pushing to repo
+  BASE_URL: ${{ secrets.BASE_URL }}
+  START_PATH: ${{ secrets.START_PATH }}
+
+  # Staging credentials
   STAGING_USER_EMAIL: ${{ secrets.STAGING_TEST_EMAIL }}
   STAGING_USER_PASS: ${{ secrets.STAGING_TEST_PASS }}
 
@@ -20,11 +23,6 @@ jobs:
   e2e:
     name: Run Playwright E2E Tests
     runs-on: ubuntu-latest
-
-    strategy:
-      fail-fast: false
-      matrix:
-        package: ["web", "admin"]
 
     steps:
       - name: Checkout repository
@@ -37,19 +35,16 @@ jobs:
 
       - name: Install dependencies
         run: |
-          cd packages/${{ matrix.package }}
           npm ci
           npx playwright install --with-deps
 
       - name: Run Playwright tests (staging)
-        run: |
-          cd packages/${{ matrix.package }}
-          npx playwright test --reporter=html,line
+        run: npx playwright test --reporter=html,line
 
       - name: Upload Playwright report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-report-${{ matrix.package }}
-          path: packages/${{ matrix.package }}/playwright-report/
+          name: playwright-report
+          path: playwright-report/
           retention-days: 7
