@@ -33,7 +33,7 @@ export default defineConfig({
   outputDir: "test-results/artifacts",
 
   use: {
-    baseURL: process.env.BASE_URL || config.baseUrl,
+    baseURL: config.baseUrl,
     headless: true,
     viewport: { width: 1440, height: 900 },
     trace: "retain-on-failure",
