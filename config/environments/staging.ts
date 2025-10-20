@@ -8,8 +8,8 @@ export interface EnvironmentConfig {
 }
 
 export const STAGING_CONFIG: EnvironmentConfig = {
-  baseUrl: process.env.BASE_URL || "https://request.na.test.1800gotjunk.dev",
-  startPath: process.env.START_PATH || "/us_en/onlinebooking",
+  baseUrl: "https://request.na.test.1800gotjunk.dev",
+  startPath: "/us_en/onlinebooking",
   timeout: 45000,
 };
 
