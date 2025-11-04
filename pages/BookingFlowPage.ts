@@ -41,7 +41,6 @@ export class BookingFlowPage {
   readonly addressInput: Locator;
   readonly firstNameInput: Locator;
   readonly lastNameInput: Locator;
-  readonly nameInput: Locator;
   readonly phoneInput: Locator;
   readonly emailInput: Locator;
   readonly bookFreeEstimateButton: Locator;
@@ -210,9 +209,14 @@ export class BookingFlowPage {
   }
 
   async submitBookingAndWaitForConfirmation() {
+    const successUrlPath = "**/onlinebooking/thank-you";
+
     await Promise.all([
-      this.page.waitForLoadState("networkidle"), // wait for full network idle
+      this.page.waitForURL(successUrlPath, { timeout: 45000 }),
       this.bookFreeEstimateButton.click(),
     ]);
+
+    const successHeading = this.page.locator("#obe-spa h1");
+    await expect(successHeading).toBeVisible();
   }
 }
