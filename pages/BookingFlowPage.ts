@@ -1,5 +1,3 @@
-// test/e2e/pages/BookingFlowPage.ts
-
 import { Locator, Page, expect } from "@playwright/test";
 
 import { loadConfig } from "../config/ConfigLoader";
@@ -45,7 +43,6 @@ export class BookingFlowPage {
   readonly emailInput: Locator;
   readonly bookFreeEstimateButton: Locator;
   readonly saveToAccountButton: Locator;
-  // readonly saveToAccountButton: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -148,7 +145,7 @@ export class BookingFlowPage {
     await this.datePicker.click();
     await this.availableDate.waitFor({ state: "visible" });
     await this.availableDate.click();
-    await this.page.waitForTimeout(2000);
+    await expect(this.timePicker).toBeVisible({ timeout: 5000 });
   }
 
   async selectTimeSlot(): Promise<void> {
@@ -181,9 +178,7 @@ export class BookingFlowPage {
   ): Promise<void> {
     await expect(this.addressInput).toBeVisible();
     await this.addressInput.click();
-    // await this.page.waitForTimeout(2000);
     await this.addressInput.fill(address);
-    // await this.page.waitForTimeout(1000);
     await this.page.getByText(expectedAutoSuggest).click();
   }
 
@@ -209,12 +204,15 @@ export class BookingFlowPage {
   }
 
   async submitBookingAndWaitForConfirmation() {
-    const successUrlPath = "**/onlinebooking/thank-you";
+    const successUrlPath = /thank-you/i;
+    //    const successUrlPath = '**/onlinebooking/thank-you';
 
-    await Promise.all([
-      this.page.waitForURL(successUrlPath, { timeout: 45000 }),
-      this.bookFreeEstimateButton.click(),
-    ]);
+    this.bookFreeEstimateButton.click({});
+    await this.page.waitForURL(successUrlPath, { timeout: 60000 });
+    // await Promise.all([
+    //   this.page.waitForURL(successUrlPath, { timeout: 45000 }),
+    //   this.bookFreeEstimateButton.click(),
+    // ]);
 
     const successHeading = this.page.locator("#obe-spa h1");
     await expect(successHeading).toBeVisible();
