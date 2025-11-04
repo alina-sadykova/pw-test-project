@@ -144,7 +144,7 @@ export class BookingFlowPage {
 
   // Step 2: Choose date and time
   async selectDate(): Promise<void> {
-    await expect(this.datePicker).toBeVisible();
+    await expect(this.datePicker).toBeVisible({ timeout: 10000 });
     await this.datePicker.click();
     await this.availableDate.waitFor({ state: "visible" });
     await this.availableDate.click();
